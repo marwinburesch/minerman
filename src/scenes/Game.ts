@@ -5,14 +5,22 @@ import Sprite from "../components/Sprite";
 import Velocity from "../components/Velocity";
 import { createSpriteSystem } from "../systems/SpriteSystem";
 import createMovementSystem from "../systems/MovementSystem";
+import Player from "../components/Player";
+import createPlayerSystem from "../systems/PlayerSystem";
 
 export class Game extends Scene {
+  private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private world?: IWorld;
   private spriteSystem?: System;
   private movementSystem?: System;
+  private playerSystem?: System;
 
   constructor() {
     super("Game");
+  }
+
+  init() {
+    this.cursors = this.input.keyboard!.createCursorKeys();
   }
 
   preload() {
@@ -33,8 +41,6 @@ export class Game extends Scene {
     Position.y[bat] = 200;
 
     addComponent(this.world, Velocity, miner);
-    Velocity.x[miner] = 5;
-    Velocity.y[miner] = 0;
     addComponent(this.world, Velocity, bat);
     Velocity.x[bat] = 5;
     Velocity.y[bat] = 5;
@@ -44,14 +50,18 @@ export class Game extends Scene {
     addComponent(this.world, Sprite, bat);
     Sprite.texture[bat] = 1;
 
+    addComponent(this.world, Player, miner);
+
     this.spriteSystem = createSpriteSystem(this, ["miner", "bat"]);
     this.movementSystem = createMovementSystem();
+    this.playerSystem = createPlayerSystem(this.cursors);
   }
 
   update(t: number, dt: number): void {
     if (!this.world || !this.spriteSystem) {
       return;
     }
+    this.playerSystem?.(this.world);
     this.movementSystem?.(this.world);
     this.spriteSystem(this.world);
   }
