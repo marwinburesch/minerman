@@ -4,10 +4,12 @@ import Position from "../components/Position";
 import Sprite from "../components/Sprite";
 import Velocity from "../components/Velocity";
 import { createSpriteSystem } from "../systems/SpriteSystem";
+import createMovementSystem from "../systems/MovementSystem";
 
 export class Game extends Scene {
   private world?: IWorld;
   private spriteSystem?: System;
+  private movementSystem?: System;
 
   constructor() {
     super("Game");
@@ -32,7 +34,7 @@ export class Game extends Scene {
 
     addComponent(this.world, Velocity, miner);
     Velocity.x[miner] = 5;
-    Velocity.y[miner] = 5;
+    Velocity.y[miner] = 0;
     addComponent(this.world, Velocity, bat);
     Velocity.x[bat] = 5;
     Velocity.y[bat] = 5;
@@ -43,12 +45,14 @@ export class Game extends Scene {
     Sprite.texture[bat] = 1;
 
     this.spriteSystem = createSpriteSystem(this, ["miner", "bat"]);
+    this.movementSystem = createMovementSystem();
   }
 
   update(t: number, dt: number): void {
     if (!this.world || !this.spriteSystem) {
       return;
     }
+    this.movementSystem?.(this.world);
     this.spriteSystem(this.world);
   }
 }
